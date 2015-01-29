@@ -76,8 +76,6 @@ def cleanup():
     pass
 
 def runCollect (volName, scratchDir, start, end):
-    collectionDir = os.path.join (scratchDir, "collection")
-    os.mkdir (collectionDir)
     # file exists OSError
     volInfo = getVolInfo (volName)
     for host, brickPath in volInfo:
@@ -89,6 +87,8 @@ def runCollect (volName, scratchDir, start, end):
 
 
 def runFetch (volName, scratchDir):
+    collectionDir = os.path.join (scratchDir, "collection")
+    os.mkdir (collectionDir)
     volInfo = getVolInfo (volName)
     count = 0
     for host, brickPath in volInfo:
@@ -96,3 +96,13 @@ def runFetch (volName, scratchDir):
         count = count +1
 	print "Done fetching from : ", host, brickPath
 
+    collectionDir = os.path.join (scratchDir, "collection")
+    fullBlist = os.path.join (collectionDir, "backupList.full")
+    with open(fullBlist, "a+") as fd:
+        for root, dirs, blists in os.walk(collectionDir):
+	    for blist in blists:
+                if "remote" in blist:
+                    blistPath = os.path.join(collectionDir, blist)
+                    with open(blistPath) as bfd:
+                        for line in bfd:
+                            fd.write(line)
