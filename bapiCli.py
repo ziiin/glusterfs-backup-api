@@ -30,7 +30,7 @@ def getVolInfo (volName):
 
 def collect (host, brickPath, scratchDir, start, end):
     HOST = host
-    COMMAND = "python /home/ajha/git/git_u/glusterfs/backup/parseCl.py " + \
+    COMMAND = "python /backup/src/bapi/parseCl.py " + \
                 brickPath +" " + scratchDir + " " + \
                 os.path.join(scratchDir, "changes.log") + " " + \
                 str(start) + " " + str(end)
@@ -40,12 +40,14 @@ def collect (host, brickPath, scratchDir, start, end):
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
     
-    result = ssh.stdout.readlines()
+    result, err = ssh.communicate()
+    '''
     if result == []:
         error = ssh.stderr.readlines()
         print >>sys.stderr, "ERROR: %s " % error
     else:
         print result
+    '''
 
 def fetch(host, scratchDir, count):
     # args, brick_ip, scratch_dir
@@ -80,6 +82,7 @@ def runCollect (volName, scratchDir, start, end):
     volInfo = getVolInfo (volName)
     for host, brickPath in volInfo:
         collect (host, brickPath, scratchDir, start, end)
+	print "Done collecting at: ", host , brickPath
 
     # create backuplist.full 
     # readdir collectionDir, keep reading from all files and add to "backuplist.full"
@@ -91,4 +94,5 @@ def runFetch (volName, scratchDir):
     for host, brickPath in volInfo:
         fetch (host, scratchDir, count)
         count = count +1
+	print "Done fetching from : ", host, brickPath
 
