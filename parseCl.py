@@ -12,6 +12,7 @@ import sys
 import time
 import libgfchangelog
 import subprocess
+import hashlib
 
 cl = libgfchangelog.Changes()
 
@@ -88,11 +89,19 @@ def get_changes(brick, scratch_dir, log_file, log_level, start, end):
         print ex
     #finally: close gfid_list
 
+def runGetChanges (brick, scratch_dir, log_level, start, end):
+    brickHash = hashlib.sha1(brick)
+    hashDir = os.path.join(scratch_dir, str(brickHash.hexdigest()))
+
+    # handle OSError
+    os.mkdir (hashDir)
+    log_file = os.path.join(hashDir, "backup.log")
+    get_changes (brick, hashDir, log_file, log_level, start, end)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 6:
-        print("usage: %s <brick> <scratch-dir> <log-file> <start> <end>"
+    if len(sys.argv) != 5:
+        print("usage: %s <brick> <scratch-dir> <start> <end>"
               % (sys.argv[0]))
         sys.exit(1)
-    get_changes(sys.argv[1], sys.argv[2], sys.argv[3], 9, \
-            int(sys.argv[4]), int(sys.argv[5]))
+    runGetChanges(sys.argv[1], sys.argv[2], 9, \
+            int(sys.argv[3]), int(sys.argv[4]))

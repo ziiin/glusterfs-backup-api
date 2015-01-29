@@ -9,6 +9,7 @@ import sys
 import re
 import time
 import subprocess
+import hashlib
 
 def getVolInfo (volName):
     gvi = subprocess.Popen(["gluster", "volume", "info", volName],
@@ -49,9 +50,10 @@ def collect (host, brickPath, scratchDir, start, end):
         print result
     '''
 
-def fetch(host, scratchDir, count):
+def fetch(host, brick, scratchDir, count):
     # args, brick_ip, scratch_dir
-    srcPath = os.path.join (scratchDir,"backup", "backup_list")
+    hashDir = str( hashlib.sha1(brick).hexdigest() )
+    srcPath = os.path.join (scratchDir, hashDir, "backup", "backup_list")
     destFname = "remote_list" + re.sub(r'\.', "_", host) + "_" + str(count)
     destPath = os.path.join (scratchDir,"collection", destFname)
 
@@ -92,7 +94,7 @@ def runFetch (volName, scratchDir):
     volInfo = getVolInfo (volName)
     count = 0
     for host, brickPath in volInfo:
-        fetch (host, scratchDir, count)
+        fetch (host, brickPath, scratchDir, count)
         count = count +1
 	print "Done fetching from : ", host, brickPath
 
