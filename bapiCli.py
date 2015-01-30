@@ -87,7 +87,6 @@ def collect (host, brickPath, scratchDir, start, end):
     HOST = host
     COMMAND = "python /backup/src/bapi/parseCl.py " + \
                 brickPath +" " + scratchDir + " " + \
-                os.path.join(scratchDir, "changes.log") + " " + \
                 str(start) + " " + str(end)
 
     ssh = subprocess.Popen(["ssh", "%s" % HOST , COMMAND],
@@ -96,6 +95,8 @@ def collect (host, brickPath, scratchDir, start, end):
                            stderr=subprocess.PIPE)
 
     result, err = ssh.communicate()
+    print result
+    print err
     '''
     if result == []:
         error = ssh.stderr.readlines()
@@ -148,15 +149,17 @@ def runCleanup(volName, scratchDir):
 
     Returns: None
     '''
-    HOST = host
-    COMMAND = "python /backup/src/bapi/parseCl.py " + scratchDir
+    volInfo = getVolInfo (volName)
+    for host, brickPath in volInfo:
+        HOST = host
+        COMMAND = "python /backup/src/bapi/parseCl.py " + scratchDir
 
-    ssh = subprocess.Popen(["ssh", "%s" % HOST , COMMAND],
-                           shell=False,
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
+        ssh = subprocess.Popen(["ssh", "%s" % HOST , COMMAND],
+                               shell=False,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
 
-    result, err = ssh.communicate()
+        result, err = ssh.communicate()
 
 def runCollect (volName, scratchDir, start, end):
     '''
